@@ -3,21 +3,37 @@ CPPFLAGS     =
 LDFLAGS      =
 LIBS         = -lm
 
-DESTDIR = ./
+DESTDIR = bin/
+OBJDIR  = obj/
 TARGET  = main
 
-OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+OBJECTS = $(addprefix $(OBJDIR), $(patsubst %.cpp,%.o,$(wildcard *.cpp)))
 
-all: $(DESTDIR)$(TARGET)
+.PHONY: all clean
 
-$(DESTDIR)$(TARGET): $(OBJECTS)
-	$(SYSCONF_LINK) -Wall $(LDFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(LIBS)
+all: $(OBJDIR) $(DESTDIR) $(DESTDIR)$(TARGET)
 
-$(OBJECTS): %.o: %.cpp
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+$(DESTDIR):
+	mkdir $(DESTDIR)
+
+# noob notes
+# https://www.gnu.org/software/make/manual/make.html
+#
+# $@ expands to the name of the currently built target
+# $< means 'first dependency'
+# $^ expands all the dependencies
+$(OBJDIR)%.o: %.cpp
 	$(SYSCONF_LINK) -Wall $(CPPFLAGS) -c $(CFLAGS) $< -o $@
 
+$(DESTDIR)$(TARGET): $(OBJECTS)
+	$(SYSCONF_LINK) -Wall $(LDFLAGS) -o $@ $^ $(LIBS)
+
+
 clean:
-	-rm -f $(OBJECTS)
-	-rm -f $(TARGET)
+	-rm -rf $(OBJDIR)
+	-rm -rf $(DESTDIR)
 	-rm -f *.tga
 
